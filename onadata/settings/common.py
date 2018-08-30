@@ -204,6 +204,9 @@ DATABASES = {
     }
 }
 
+DATABASE_ROUTERS = os.environ.get('DATABASE_ROUTERS', '').split()
+
+SLAVE_DATABASES = os.environ.get('SLAVE_DATABASES', '').split()
 
 # Caching
 CACHES = {
