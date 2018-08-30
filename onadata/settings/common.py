@@ -25,6 +25,8 @@ from django.utils.log import AdminEmailHandler
 
 from celery.signals import after_setup_logger
 
+from onadata.libs.utils.string import str2bool
+
 
 # setting default encoding to utf-8
 if sys.version[0] == '2':
@@ -36,6 +38,20 @@ PROJECT_ROOT = os.path.realpath(
     os.path.join(os.path.dirname(CURRENT_FILE), '../'))
 PRINT_EXCEPTION = False
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+except ImportError:
+    pass
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('SECRET_KEY', 's3cr3t-K3y')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = str2bool(os.environ.get('DEBUG', False))
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split()
+
 TEMPLATED_EMAIL_TEMPLATE_DIR = 'templated_email/'
 
 ADMINS = (
@@ -44,11 +60,15 @@ ADMINS = (
 MANAGERS = ADMINS
 
 
-DEFAULT_FROM_EMAIL = 'noreply@ona.io'
-SHARE_PROJECT_SUBJECT = '{} Ona Project has been shared with you.'
-SHARE_ORG_SUBJECT = '{}, You have been added to {} organisation.'
-DEFAULT_SESSION_EXPIRY_TIME = 21600  # 6 hours
-DEFAULT_TEMP_TOKEN_EXPIRY_TIME = 21600  # 6 hours
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@ona.io')
+SHARE_PROJECT_SUBJECT = os.environ.get(
+    'SHARE_PROJECT_SUBJECT', '{} Ona Project has been shared with you.')
+SHARE_ORG_SUBJECT = os.environ.get(
+    'SHARE_ORG_SUBJECT', '{}, You have been added to {} organisation.')
+DEFAULT_SESSION_EXPIRY_TIME = int(os.environ.get(
+    'DEFAULT_SESSION_EXPIRY_TIME', 21600))  # 6 hours by default
+DEFAULT_TEMP_TOKEN_EXPIRY_TIME = int(os.environ.get(
+    'DEFAULT_TEMP_TOKEN_EXPIRY_TIME', 21600))  # 6 hours by default
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -57,11 +77,11 @@ DEFAULT_TEMP_TOKEN_EXPIRY_TIME = 21600  # 6 hours
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = os.environ.get('TIME_ZONE', 'America/New_York')
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = os.environ.get('LANGUAGE_CODE', 'en-us')
 
 LANGUAGES = (
     ('fr', u'Français'),
@@ -74,57 +94,68 @@ LANGUAGES = (
     ('zh', u'中文'),
 )
 
-SITE_ID = 1
+SITE_ID = int(os.environ.get('SITE_ID', 1))
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
-USE_I18N = True
+USE_I18N = str2bool(os.environ.get('USE_I18N', True))
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
-USE_L10N = True
+USE_L10N = str2bool(os.environ.get('USE_L10N', True))
+
+# Media root
+MEDIA_ROOT = os.environ.get(
+    'MEDIA_ROOT', os.path.join(PROJECT_ROOT, 'media'))
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = 'http://localhost:8000/media/'
+MEDIA_URL = os.environ.get('MEDIA_URL', 'http://localhost:8000/media/')
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
+STATIC_ROOT = os.environ.get(
+    'STATIC_ROOT', os.path.join(PROJECT_ROOT, 'static'))
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 # Enketo URL
-ENKETO_PROTOCOL = 'https'
-ENKETO_URL = 'https://enketo.ona.io/'
-ENKETO_API_SURVEY_PATH = '/api_v2/survey'
-ENKETO_API_INSTANCE_PATH = '/api_v2/instance'
-ENKETO_PREVIEW_URL = urljoin(ENKETO_URL, ENKETO_API_SURVEY_PATH + '/preview')
-ENKETO_API_TOKEN = ''
-ENKETO_API_INSTANCE_IFRAME_URL = ENKETO_URL + "api_v2/instance/iframe"
-ENKETO_API_SALT = 'secretsalt'
-VERIFY_SSL = True
+ENKETO_PROTOCOL = os.environ.get('ENKETO_PROTOCOL', 'https')
+ENKETO_URL = os.environ.get('ENKETO_URL', 'https://enketo.ona.io/')
+ENKETO_API_SURVEY_PATH = os.environ.get(
+    'ENKETO_API_SURVEY_PATH', '/api_v2/survey')
+ENKETO_API_INSTANCE_PATH = os.environ.get(
+    'ENKETO_API_INSTANCE_PATH', '/api_v2/instance')
+ENKETO_PREVIEW_URL = os.environ.get(
+    'ENKETO_PREVIEW_URL',
+    urljoin(ENKETO_URL, ENKETO_API_SURVEY_PATH + '/preview'))
+ENKETO_API_TOKEN = os.environ.get('ENKETO_API_TOKEN', '')
+ENKETO_API_INSTANCE_IFRAME_URL = os.environ.get(
+    'ENKETO_API_INSTANCE_IFRAME_URL', ENKETO_URL + "api_v2/instance/iframe")
+ENKETO_API_SALT = os.environ.get('ENKETO_API_SALT', 'secretsalt')
+VERIFY_SSL = str2bool(os.environ.get('VERIFY_SSL', True))
+
+TOUCHFORMS_URL = os.environ.get('TOUCHFORMS_URL', 'http://localhost:9000/')
 
 # Login URLs
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/login_redirect/'
+LOGIN_URL = os.environ.get('LOGIN_URL', '/accounts/login/')
+LOGIN_REDIRECT_URL = os.environ.get('LOGIN_REDIRECT_URL', '/login_redirect/')
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
+ADMIN_MEDIA_PREFIX = os.environ.get('ADMIN_MEDIA_PREFIX', '/static/admin/')
 
 # Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+# Put strings here, like "/home/html/static" or "C:/www/django/static".
+# Always use forward slashes, even on Windows.
+# Don't forget to use absolute paths, not relative paths.
+STATICFILES_DIRS = os.environ.get('STATICFILES_DIRS', '').split()
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -157,6 +188,41 @@ TEMPLATES = [
     },
 ]
 
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DATABASES_DEFAULT_ENGINE',
+                                 'django.contrib.gis.db.backends.postgis'),
+        'NAME': os.environ.get('DATABASES_DEFAULT_NAME', 'onadata'),
+        'USER': os.environ.get('DATABASES_DEFAULT_USER', 'onadata'),
+        'PASSWORD': os.environ.get('DATABASES_DEFAULT_PASSWORD', ''),
+        'HOST': os.environ.get('DATABASES_DEFAULT_HOST', '127.0.0.1'),
+        'PORT': int(os.environ.get('DATABASES_DEFAULT_PORT', 5432)),
+        'CONN_MAX_AGE': int(os.environ.get(
+            'DATABASES_DEFAULT_CONN_MAX_AGE', 0)),
+        'ATOMIC_REQUESTS': str2bool(os.environ.get(
+            'DATABASES_DEFAULT_ATOMIC_REQUESTS', False))
+    }
+}
+
+
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': os.environ.get(
+            'CACHES_DEFAULT_BACKEND',
+            'django.core.cache.backends.memcached.PyLibMCCache'),
+        'LOCATION': os.environ.get(
+            'CACHES_DEFAULT_LOCATION', '127.0.0.1:11211').split(),
+        'TIMEOUT': int(os.environ.get('CACHES_DEFAULT_TIMEOUT', 300)),
+        'VERSION': int(os.environ.get('CACHES_DEFAULT_VERSION', 1)),
+    }
+}
+
+CACHE_MIDDLEWARE_SECONDS = int(os.environ.get(
+    'CACHE_MIDDLEWARE_SECONDS', 3600))
+CACHE_MIDDLEWARE_KEY_PREFIX = os.environ.get('CACHE_MIDDLEWARE_KEY_PREFIX', '')
+
+# Middleware
 
 MIDDLEWARE = (
     'onadata.libs.profiling.sql.SqlTimingMiddleware',
@@ -170,15 +236,19 @@ MIDDLEWARE = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'onadata.libs.utils.middleware.HTTPResponseNotAllowedMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 LOCALE_PATHS = (os.path.join(PROJECT_ROOT, 'onadata.apps.main', 'locale'), )
 
 ROOT_URLCONF = 'onadata.apps.main.urls'
-USE_TZ = True
+USE_TZ = str2bool(os.environ.get('USE_TZ', True))
 
 # needed by guardian
-ANONYMOUS_DEFAULT_USERNAME = 'AnonymousUser'
+ANONYMOUS_DEFAULT_USERNAME = os.environ.get(
+    'ANONYMOUS_DEFAULT_USERNAME', 'AnonymousUser')
 
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
@@ -259,18 +329,19 @@ SWAGGER_SETTINGS = {
     ],
 }
 
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = (
-    'dev.ona.io',
-)
+CORS_ORIGIN_ALLOW_ALL = str2bool(os.environ.get(
+    'CORS_ORIGIN_ALLOW_ALL', False))
+CORS_ALLOW_CREDENTIALS = str2bool(os.environ.get(
+    'CORS_ALLOW_CREDENTIALS', True))
+CORS_ORIGIN_WHITELIST = os.environ.get(
+    'CORS_ORIGIN_WHITELIST', 'dev.ona.io').split()
 CORS_URLS_ALLOW_ALL_REGEX = (
     r'^/api/v1/osm/.*$',
 )
 
 USE_THOUSAND_SEPARATOR = True
 
-COMPRESS = True
+COMPRESS = str2bool(os.environ.get('COMPRESS', True))
 
 # extra data stored with users
 AUTH_PROFILE_MODULE = 'onadata.apps.main.UserProfile'
@@ -282,7 +353,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Settings for Django Registration
-ACCOUNT_ACTIVATION_DAYS = 1
+ACCOUNT_ACTIVATION_DAYS = int(os.environ.get('ACCOUNT_ACTIVATION_DAYS', 1))
 
 
 def skip_suspicious_operations(record):
@@ -414,9 +485,11 @@ def configure_logging(logger, **kwargs):
 
 after_setup_logger.connect(configure_logging)
 
-GOOGLE_STEP2_URI = 'http://ona.io/gwelcome'
-GOOGLE_OAUTH2_CLIENT_ID = 'REPLACE ME'
-GOOGLE_OAUTH2_CLIENT_SECRET = 'REPLACE ME'
+GOOGLE_STEP2_URI = os.environ.get('GOOGLE_STEP2_URI', 'http://ona.io/gwelcome')
+GOOGLE_OAUTH2_CLIENT_ID = os.environ.get(
+    'GOOGLE_OAUTH2_CLIENT_ID', 'REPLACE ME')
+GOOGLE_OAUTH2_CLIENT_SECRET = os.environ.get(
+    'GOOGLE_OAUTH2_CLIENT_SECRET', 'REPLACE ME')
 
 THUMB_CONF = {
     'large': {'size': 1280, 'suffix': '-large'},
@@ -424,29 +497,36 @@ THUMB_CONF = {
     'small': {'size': 240, 'suffix': '-small'},
 }
 # order of thumbnails from largest to smallest
-THUMB_ORDER = ['large', 'medium', 'small']
-IMG_FILE_TYPE = 'jpg'
+THUMB_ORDER = os.environ.get('THUMB_ORDER', 'large medium small').split()
+IMG_FILE_TYPE = os.environ.get('IMG_FILE_TYPE', 'jpg')
 
 # celery
-CELERY_RESULT_BACKEND = 'django-db'
-CELERY_TASK_ALWAYS_EAGER = False
-CELERY_TASK_IGNORE_RESULT = False
-CELERY_TASK_TRACK_STARTED = True
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'django-db')
+CELERY_TASK_ALWAYS_EAGER = str2bool(os.environ.get(
+    'CELERY_TASK_ALWAYS_EAGER', False))
+CELERY_TASK_IGNORE_RESULT = str2bool(os.environ.get(
+    'CELERY_TASK_IGNORE_RESULT', False))
+CELERY_TASK_TRACK_STARTED = str2bool(os.environ.get(
+    'CELERY_TASK_TRACK_STARTED', False))
 CELERY_IMPORTS = ('onadata.libs.utils.csv_import',)
 
 
-CSV_FILESIZE_IMPORT_ASYNC_THRESHOLD = 100000  # Bytes
-GOOGLE_SHEET_UPLOAD_BATCH = 1000
+CSV_FILESIZE_IMPORT_ASYNC_THRESHOLD = int(os.environ.get(
+    'CSV_FILESIZE_IMPORT_ASYNC_THRESHOLD', 100000))  # Bytes
+GOOGLE_SHEET_UPLOAD_BATCH = int(os.environ.get(
+    'GOOGLE_SHEET_UPLOAD_BATCH', 1000))
 
 # duration to keep zip exports before deletion (in seconds)
-ZIP_EXPORT_COUNTDOWN = 3600  # 1 hour
+ZIP_EXPORT_COUNTDOWN = int(os.environ.get('ZIP_EXPORT_COUNTDOWN', 3600))
 
 # number of records on export or CSV import before a progress update
-EXPORT_TASK_PROGRESS_UPDATE_BATCH = 1000
-EXPORT_TASK_LIFESPAN = 6  # six hours
+EXPORT_TASK_PROGRESS_UPDATE_BATCH = int(os.environ.get(
+    'EXPORT_TASK_PROGRESS_UPDATE_BATCH', 1000))
+EXPORT_TASK_LIFESPAN = int(os.environ.get('EXPORT_TASK_LIFESPAN', 6))  # hours
 
 # default content length for submission requests
-DEFAULT_CONTENT_LENGTH = 10000000
+DEFAULT_CONTENT_LENGTH = int(os.environ.get(
+    'DEFAULT_CONTENT_LENGTH', 10000000))
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 NOSE_ARGS = ['--with-fixture-bundling', '--nologcapture', '--nocapture']
@@ -505,12 +585,16 @@ SUPPORTED_MEDIA_UPLOAD_TYPES = [
     'application/zip',
 ]
 
-CSV_ROW_IMPORT_ASYNC_THRESHOLD = 100
-SEND_EMAIL_ACTIVATION_API = False
-METADATA_SEPARATOR = "|"
+CSV_ROW_IMPORT_ASYNC_THRESHOLD = int(os.environ.get(
+    'CSV_ROW_IMPORT_ASYNC_THRESHOLD', 100))
+SEND_EMAIL_ACTIVATION_API = str2bool(os.environ.get(
+    'SEND_EMAIL_ACTIVATION_API', False))
+METADATA_SEPARATOR = os.environ.get('METADATA_SEPARATOR', '|')
 
-PARSED_INSTANCE_DEFAULT_LIMIT = 1000000
-PARSED_INSTANCE_DEFAULT_BATCHSIZE = 1000
+PARSED_INSTANCE_DEFAULT_LIMIT = int(os.environ.get(
+    'PARSED_INSTANCE_DEFAULT_LIMIT', 1000000))
+PARSED_INSTANCE_DEFAULT_BATCHSIZE = int(os.environ.get(
+    'PARSED_INSTANCE_DEFAULT_BATCHSIZE', 1000))
 
 PROFILE_SERIALIZER = \
     "onadata.libs.serializers.user_profile_serializer.UserProfileSerializer"
@@ -520,28 +604,36 @@ BASE_VIEWSET = "onadata.libs.baseviewset.DefaultBaseViewset"
 
 path = os.path.join(PROJECT_ROOT, "..", "extras", "reserved_accounts.txt")
 
-EXPORT_WITH_IMAGE_DEFAULT = True
+EXPORT_WITH_IMAGE_DEFAULT = str2bool(os.environ.get(
+    'EXPORT_WITH_IMAGE_DEFAULT', True))
 try:
     with open(path, 'r') as f:
         RESERVED_USERNAMES = [line.rstrip() for line in f]
 except EnvironmentError:
     RESERVED_USERNAMES = []
 
-STATIC_DOC = '/static/docs/index.html'
+STATIC_DOC = os.environ.get('STATIC_DOC', '/static/docs/index.html')
 
 try:
     HOSTNAME = socket.gethostname()
 except Exception:
     HOSTNAME = 'localhost'
 
-CACHE_MIXIN_SECONDS = 60
+CACHE_MIXIN_SECONDS = int(os.environ.get('CACHE_MIXIN_SECONDS', 60))
 
-TAGGIT_CASE_INSENSITIVE = True
+TAGGIT_CASE_INSENSITIVE = str2bool(os.environ.get(
+    'TAGGIT_CASE_INSENSITIVE', True))
 
-DEFAULT_CELERY_MAX_RETIRES = 3
-DEFAULT_CELERY_INTERVAL_START = 2
-DEFAULT_CELERY_INTERVAL_MAX = 0.5
-DEFAULT_CELERY_INTERVAL_STEP = 0.5
+DEFAULT_CELERY_MAX_RETIRES = int(os.environ.get(
+    'DEFAULT_CELERY_MAX_RETIRES', 3))
+DEFAULT_CELERY_INTERVAL_START = float(os.environ.get(
+    'DEFAULT_CELERY_INTERVAL_START', 2))
+DEFAULT_CELERY_INTERVAL_MAX = float(os.environ.get(
+    'DEFAULT_CELERY_INTERVAL_MAX', 0.5))
+DEFAULT_CELERY_INTERVAL_STEP = float(os.environ.get(
+    'DEFAULT_CELERY_INTERVAL_STEP', 0.5))
+
+CUSTOM_MAIN_URLS = set(os.environ.get('CUSTOM_MAIN_URLS', '').split())
 
 # legacy setting for old sites who still use a local_settings.py file and have
 # not updated to presets/
@@ -551,5 +643,6 @@ except ImportError:
     pass
 
 # email verification
-ENABLE_EMAIL_VERIFICATION = False
-VERIFIED_KEY_TEXT = 'ALREADY_ACTIVATED'
+ENABLE_EMAIL_VERIFICATION = str2bool(os.environ.get(
+    'ENABLE_EMAIL_VERIFICATION', False))
+VERIFIED_KEY_TEXT = os.environ.get('VERIFIED_KEY_TEXT', 'ALREADY_ACTIVATED')

@@ -9,6 +9,7 @@ pyxform
 search_index
 tmp/*
 xform_manager_dataset.json
+.env
 
 # folder to hold csv files
 csvs
