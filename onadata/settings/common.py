@@ -154,7 +154,7 @@ ADMIN_MEDIA_PREFIX = os.environ.get('ADMIN_MEDIA_PREFIX', '/static/admin/')
 # Put strings here, like "/home/html/static" or "C:/www/django/static".
 # Always use forward slashes, even on Windows.
 # Don't forget to use absolute paths, not relative paths.
-STATICFILES_DIRS = os.environ.get('STATICFILES_DIRS', '').split()
+STATICFILES_DIRS = os.environ.get('STATICFILES_DIRS', 'assets').split()
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -168,7 +168,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': os.environ.get('TEMPLATES_DIRS', '').split() or [
-            os.path.join(PROJECT_ROOT, 'libs/templates'),
+            os.path.join(BASE_DIR, 'libs/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
