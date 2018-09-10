@@ -167,7 +167,7 @@ STATICFILES_FINDERS = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
+        'DIRS': os.environ.get('TEMPLATES_DIRS', '').split() or [
             os.path.join(PROJECT_ROOT, 'libs/templates'),
         ],
         'APP_DIRS': True,
