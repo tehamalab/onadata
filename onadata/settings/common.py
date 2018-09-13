@@ -25,7 +25,7 @@ from django.utils.log import AdminEmailHandler
 
 from celery.signals import after_setup_logger
 
-from onadata.libs.utils.string import str2bool
+from onadata.libs.utils.string import str2bool, str2int
 
 
 # setting default encoding to utf-8
@@ -196,7 +196,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('DATABASES_DEFAULT_PASSWORD', ''),
         'HOST': os.environ.get('DATABASES_DEFAULT_HOST', '127.0.0.1'),
         'PORT': int(os.environ.get('DATABASES_DEFAULT_PORT', 5432)),
-        'CONN_MAX_AGE': int(os.environ.get(
+        'CONN_MAX_AGE': str2int(os.environ.get(
             'DATABASES_DEFAULT_CONN_MAX_AGE', 0)),
         'ATOMIC_REQUESTS': str2bool(os.environ.get(
             'DATABASES_DEFAULT_ATOMIC_REQUESTS', False))
